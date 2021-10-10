@@ -1,0 +1,36 @@
+--[[ Made by TechHog#8984 ]]--
+
+local module = {}
+
+function module:Get(part)
+    local run = game:GetService("RunService")
+
+    while wait(0.1) do
+        local old_speed = part.Position
+        wait(0.1)
+        local sum = nil
+        local old_X = old_speed.X
+        local old_Y = old_speed.Y
+        local old_Z = old_speed.Z
+
+        local new_X = part.Position.X
+        local new_Y = part.Position.Y
+        local new_Z = part.Position.Z
+
+        local X_math = old_X - new_X
+        local Z_math = old_Z - new_Z
+        
+        local b = tostring(string.split(tostring(X_math),tostring("."))[1])
+        local c = tostring(string.split(tostring(Z_math),tostring("."))[1])
+
+        if tonumber(b) ~= 0 then
+          sum = b
+        end
+        if tonumber(b) == 0 then
+          sum = c
+        end
+        return sum
+    end
+end
+
+return module
