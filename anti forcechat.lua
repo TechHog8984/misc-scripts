@@ -1,4 +1,4 @@
-assert(hookmetamethod, 'hookmetamethod not found.')
+assert(hookmetamethod, 'hookmetamethod not found')
 assert(getnamecallmethod, 'getnamecallmethod not found')
 
 local player = game:GetService'Players'.LocalPlayer
