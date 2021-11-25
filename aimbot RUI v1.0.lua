@@ -1,3 +1,5 @@
+--GuiToLua V3
+
 --objects
 local Aimbot_RUI_V1_0 = Instance.new'ScreenGui'
 
@@ -100,6 +102,8 @@ ___module__scripts___[Library] = (function()
 		Object.Parent = Container
 		
 		Library.EnterCallBacks[Object] = Info.EnterCallBack
+		
+		return Object
 	end
 	function Library:AddMenu(info)
 		local Name = info.Name
@@ -191,5 +195,4 @@ coroutine.wrap(function()
 	CAS:BindAction('Aimbot RUI V1.0 - DOWN', HandleAction, false, Enum.KeyCode.Down)
 	CAS:BindAction('Aimbot RUI V1.0 - ENTER', HandleAction, false, Enum.KeyCode.Return)
 end)()
-
 return ___module__scripts___[Library]
