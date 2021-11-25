@@ -152,6 +152,8 @@ coroutine.wrap(function()
 		if Removed:IsA'TextLabel' and Removed.Visible == true and Removed.Name ~= 'template' and table.find(Children, Removed) then
 			local RemovedIndex = table.find(Children, Removed)
 			
+			TweenService:Create(MainFrame, TweenInfo.new(.15, 10), {Size = UDim2.new(0, 232, 0, #Children * Child.Size.Y.Offset)}):Play()
+			
 			for I, Child in next, Children do
 				if Child and Child ~= Removed and Child:IsA'TextLabel' and Child.Visible == true and Child.Name ~= 'template' and I > RemovedIndex then
 					local Old = Child.Position
@@ -198,4 +200,5 @@ coroutine.wrap(function()
 	CAS:BindAction('Aimbot RUI V1.0 - DOWN', HandleAction, false, Enum.KeyCode.Down)
 	CAS:BindAction('Aimbot RUI V1.0 - ENTER', HandleAction, false, Enum.KeyCode.Return)
 end)()
+
 return ___module__scripts___[Library]
