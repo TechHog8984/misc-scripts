@@ -24,7 +24,7 @@ MainFrame.BorderSizePixel = 0
 MainFrame.Name = 'MainFrame'
 MainFrame.Parent = Aimbot_RUI_V1_0
 MainFrame.Position = UDim2.new(0.77387917041779, 0, 0, 0)
-MainFrame.Size = UDim2.new(0, 232, 0, 411)
+MainFrame.Size = UDim2.new(0, 232, 0, 31)
 
 Container.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 Container.BackgroundTransparency = 1
@@ -131,12 +131,15 @@ coroutine.wrap(function()
 	local Children = {}
 	local Library = require(script.Parent.Parent.Parent.Library)
 	local SelectedIndicator = script.Parent.Parent.SelectedIndicator
+	local MainFrame = script.Parent.Parent.Parent.MainFrame
 	
 	script.Parent.ChildAdded:Connect(function(Child)
 		if Child:IsA'TextLabel' and Child.Visible == true and Child.Name ~= 'template' then
 			Child.Position = UDim2.new(0, 0, 0, #Children * Child.Size.Y.Offset)
 			
 			table.insert(Children, Child)
+			
+			TweenService:Create(MainFrame, TweenInfo.new(.15, 10), {Size = UDim2.new(0, 232, 0, #Children * Child.Size.Y.Offset)}):Play()
 			
 			if #Children == 1 then
 				Library.Selected = Child
