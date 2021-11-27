@@ -1,7 +1,13 @@
+local _getservice = game.GetService
+local UIS = _getservice(game, 'UserInputService')
+local CAS = _getservice(game, 'ContextActionService')
+local TweenService = _getservice(game, 'TweenService')
+
 local Library = {
 	Selected = nil,
 	EnterCallBacks = {},
 }
+local Connections = {}
 
 function GetGui()
 	--GuiToLua V3
@@ -87,13 +93,9 @@ end
 local Gui, MainFrame, SelectedIndicator, Container, Template = GetGui()
 
 coroutine.wrap(function() --ContainerHandler
-	local _getservice = game.GetService
-	local CAS = _getservice(game, 'ContextActionService')
-	local TweenService = _getservice(game, 'TweenService')
-
 	local Children = {}
 
-	Container.ChildAdded:Connect(function(Child)
+	table.insert(Connections, Container.ChildAdded:Connect(function(Child)
 		if Child:IsA'TextLabel' and Child.Visible == true and Child.Name ~= 'template' then
 			Child.Position = UDim2.new(0, 0, 0, #Children * Child.Size.Y.Offset)
 			
@@ -106,9 +108,9 @@ coroutine.wrap(function() --ContainerHandler
 				TweenService:Create(SelectedIndicator.UnderLine, TweenInfo.new(.35, 10), {Size = UDim2.new(0, 232, 0, 1)}):Play()
 			end
 		end
-	end)
+	end))
 
-	Container.ChildRemoved:Connect(function(Removed)
+	table.insert(Connections, Container.ChildRemoved:Connect(function(Removed)
 		if Removed:IsA'TextLabel' and Removed.Visible == true and Removed.Name ~= 'template' and table.find(Children, Removed) then
 			local RemovedIndex = table.find(Children, Removed)
 			
@@ -124,41 +126,54 @@ coroutine.wrap(function() --ContainerHandler
 			
 			table.remove(Children, RemovedIndex)
 		end
-	end)
+	end))
 
 	local function HandleAction(Name, InputState, Input)
 		if InputState == Enum.UserInputState.End then
 			local Selected = Library.Selected
-			if Selected then
-				if Name == 'Aimbot RUI V1.0 - ENTER' then
-					local EnterCallBack = Library.EnterCallBacks[Selected]
-					if EnterCallBack then
-						coroutine.wrap(EnterCallBack)()
-					end
-				elseif Name == 'Aimbot RUI V1.0 - UP' or Name == 'Aimbot RUI V1.0 - DOWN' then
-					local SelectedIndex = table.find(Children, Selected)
-					if SelectedIndex then
-						Library.Selected = (
-							Name == 'Aimbot RUI V1.0 - UP' and Children[SelectedIndex - 1]
-						) or (
-							Name == 'Aimbot RUI V1.0 - DOWN' and Children[SelectedIndex + 1]
-						) or Library.Selected
-						
-						if Library.Selected then
-							TweenService:Create(SelectedIndicator.UnderLine, TweenInfo.new(.15, 10), {Size = UDim2.new(0, 0, 0, 1)}):Play()
-							TweenService:Create(SelectedIndicator, TweenInfo.new(.35, 10), {Position = UDim2.new(0, 0, 0, Library.Selected.Position.Y.Offset)}):Play()
-							wait(.15)
-							TweenService:Create(SelectedIndicator.UnderLine, TweenInfo.new(.15, 10), {Size = UDim2.new(0, 232, 0, 1)}):Play()
-						end
+			if Selected and Name == 'Aimbot RUI V1.0 - UP' or Name == 'Aimbot RUI V1.0 - DOWN' then
+				local SelectedIndex = table.find(Children, Selected)
+				if SelectedIndex then
+					local OldSelected = Library.Selected
+
+					Library.Selected = (
+						Name == 'Aimbot RUI V1.0 - UP' and Children[SelectedIndex - 1]
+					) or (
+						Name == 'Aimbot RUI V1.0 - DOWN' and Children[SelectedIndex + 1]
+					) or Library.Selected
+					
+					if Library.Selected and OldSelected ~= Library.Selected then
+						TweenService:Create(SelectedIndicator.UnderLine, TweenInfo.new(.15, 10), {Size = UDim2.new(0, 0, 0, 1)}):Play()
+						TweenService:Create(SelectedIndicator, TweenInfo.new(.35, 10), {Position = UDim2.new(0, 0, 0, Library.Selected.Position.Y.Offset)}):Play()
+						wait(.15)
+						TweenService:Create(SelectedIndicator.UnderLine, TweenInfo.new(.15, 10), {Size = UDim2.new(0, 232, 0, 1)}):Play()
 					end
 				end
 			end
 		end
 	end
 
+	table.insert(Connections, UIS.InputBegan:Connect(function(Input, GPE)
+		local XD = false
+		if GPE then return end
+		Input.Changed:Connect(function()
+			if XD then return end
+			if Input.UserInputState == Enum.UserInputState.End then
+				if Input.KeyCode == Enum.KeyCode.Return then
+					local Selected = Library.Selected
+					if Selected then
+						local EnterCallBack = Library.EnterCallBacks[Selected]
+						if EnterCallBack then
+							coroutine.wrap(EnterCallBack)()
+							XD = true
+						end
+					end
+				end
+			end
+		end)
+	end))
 	CAS:BindAction('Aimbot RUI V1.0 - UP', HandleAction, false, Enum.KeyCode.Up)
 	CAS:BindAction('Aimbot RUI V1.0 - DOWN', HandleAction, false, Enum.KeyCode.Down)
-	CAS:BindAction('Aimbot RUI V1.0 - ENTER', HandleAction, false, Enum.KeyCode.Return)
 end)()
 
 function Library:AddOption(Info)
@@ -173,6 +188,17 @@ function Library:AddOption(Info)
 	Library.EnterCallBacks[Object] = Info.EnterCallBack
 
 	return Object
+end
+
+function Library:Close()
+	CAS:UnbindAction('Aimbot RUI V1.0 - UP')
+	CAS:UnbindAction('Aimbot RUI V1.0 - DOWN')
+
+	for I, Con in next, Connections do
+		Con:Disconnect()
+	end
+
+	Gui:Destroy()
 end
 
 return Library
